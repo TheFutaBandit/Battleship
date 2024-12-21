@@ -1,105 +1,125 @@
-export const ship = (shipLength, shipHit = 0, shipStatus = true) => {
-    let length = shipLength;
-    let hit = shipHit;
-    let status = shipStatus;
+import {ship, Gameboard, player} from "./appModule.js";
 
-    const checkStatus = () => {
-        return status;
+import "./styles.css";
+
+let bootGame = (() => {
+    let player1 = player("dave");
+    let computer = player("computer");
+
+    const implementTile = function (tileObject, rowIndex, colIndex) {
+        const tile = document.createElement("div");
+
+        tile.classList.add("tile");
+        let defaultTileStatus = tileObject.status;
+        
+        let changeTile = (defaultTileStatus) => {
+            let tileColor = "blue";
+
+            switch (defaultTileStatus) {
+                case "water":
+                    break;
+                case "ship":
+                    tileColor = "grey";
+                    break;
+                case "hit":
+                    tileColor = "red";
+                    break;
+                case "miss":
+                    tileColor = "black";
+                    break;
+            }
+
+            return tileColor;
+        }
+
+        let tileColor = changeTile(defaultTileStatus);
+        
+        tile.setAttribute("style", `background-color:${tileColor}`);  
+
+        tile.setAttribute("data-row", rowIndex);
+        tile.setAttribute("data-col", colIndex);
+        
+        const parentBoard = document.querySelector(".player1");
+        
+        parentBoard.appendChild(tile);
+
     }
 
-    let isSunk = () => {
-        if(length <= hit) {
-            status = false;
-        } 
-        return !status;
+    const toggleTile = function(tileNode, status) {
+
+        let changeTile = (defaultTileStatus) => {
+            let tileColor = "blue";
+
+            switch (defaultTileStatus) {
+                case "water":
+                    break;
+                case "ship":
+                    tileColor = "grey";
+                    break;
+                case "hit":
+                    tileColor = "red";
+                    break;
+                case "miss":
+                    tileColor = "aqua";
+                    break;
+            }
+
+            return tileColor;
+        }
+
+        let newColor = changeTile(status);
+
+        tileNode.setAttribute("style", `background-color:${newColor}`);
     }
 
-    let hit_ship = () => {
-        hit += 1;
-    }
+    //intialize game
+    let loadBoard = (() => {
+        const board = document.querySelector(".player1")
 
-    let getLength = () => {
-        return length;
-    }
+        for(let i = 0; i < 10; i++) {
+            for(let j = 0; j < 10; j++) {
+                implementTile(player1.playerBoard.board[i][j],i,j);
+            }
+        }
+
+        board.addEventListener("click", (event) => {
+            let tile = event.target;
+            let row = tile.getAttribute("data-row");
+            let col = tile.getAttribute("data-col");
+            let status = player1.playerBoard.receiveAttack(+row,+col);
+            toggleTile(tile,status);
+            console.log(tile);
+        })
+    })();
+
+    //start game
+})();
+
+let gamebattle = (player1, player2) => {
+    let turnFlag = 0;
 
     
 
-    return {
-        checkStatus,
-        hit_ship,
-        isSunk,
-        getLength
-    }
-}
-
-export const Gameboard = () => {
-    let totalShips = 0;
-
-    let tileMaker = () => {
-        return {
-            status : "water",
-            ship : null,
-            isHit : function () { this.status = "hit" },
-            isMiss : function () { this.status = "miss" },
-            placeShip : function (ship) { this.status = "ship", this.ship = ship },
-            getShip : function () { return this.ship },
-            getStatus : function () { return this.status },
-        }
-    }
-
-    let board = Array.from({length : 10}, () => Array.from({length: 10}, () => tileMaker()));
-
-    function boundaryCheck(x,y) {
-        if(x <= 10 && x >= 0 && y <= 10 && y >= 0) {
-            return true;
+    while(player1.checkPlayerStatus() === true && player2.checkPlayerStatus() === true) {
+        if(turnFlag === 0) {
+            //intiatePlayerTurn(player1);
         } else {
-            return false;
+            intiatePlayerTurn(player2);
         }
+        turnFlag = !turnFlag;
     }
 
-    let placeShip = (x,y,ship) => {
-        if(boundaryCheck(x,y) && boundaryCheck(x+ship.getLength(), y+ship.getLength())) {
-            for(let i = 0; i<ship.getLength(); i++) {
-                board[x][y+i].placeShip(ship);
-            }
-            totalShips++;
-        }
-    }
-
-    let receiveAttack = (x,y) => {
-        let cell = board[x][y];
-        if(cell.status === "ship") {
-            let ship = cell.getShip();
-            ship.hit_ship();
-            cell.isHit();
-            if(ship.isSunk() === true) {
-                totalShips--;
-            }
-        } else {
-            cell.isMiss();
-            return "miss";
-        }
-    }
-
-    let printBoard = () => {
-        console.table(board);
-    }
-
-    let checkTotal = () => {
-        return totalShips;
-    }
-
-    return {
-        placeShip,
-        printBoard,
-        receiveAttack,
-        checkTotal
+    if(player1.checkPlayerStatus() === false) {
+        console.log("player2 wins");
+    } else {
+        console.log("player1 wins");
     }
 }
 
-export function sum(a,b) {
-    return a + b;
-}
+
+//game dom
+
+
 
 let battlefield = Gameboard();
 

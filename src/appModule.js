@@ -100,7 +100,55 @@ export const Gameboard = () => {
         printBoard,
         receiveAttack,
         checkTotal,
-        allSunk
+        allSunk,
+        board
+    }
+}
+
+export const player = (playerName) => {
+    let playerBoard = Gameboard();
+
+    let shipCounter = 0;
+
+    let name = playerName;
+
+    let ship1 = ship(3);
+    let ship2 = ship(4);
+    let ship3 = ship(3);
+    
+    playerBoard.placeShip(3,3,ship1);
+    playerBoard.placeShip(1,1,ship2);
+    playerBoard.placeShip(6,7,ship3);
+
+    let checkPlayerStatus = () => {
+        if(playerBoard.allSunk() === true) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    let playerReceiveAttack = (x,y) => {
+        playerBoard.receiveAttack(x,y);
+    } 
+
+    let playerPlaceShip = (x,y,len = 4) => {
+        playerBoard.placeShip(x,y,ship(len));
+        shipCounter++;
+    }
+
+    let playerPrintBoard = () => {
+        playerBoard.printBoard();
+    }
+
+
+    return {
+        name, 
+        playerBoard,
+        checkPlayerStatus,
+        playerReceiveAttack,
+        playerPlaceShip,
+        playerPrintBoard
     }
 }
 

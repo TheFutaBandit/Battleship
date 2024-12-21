@@ -1,4 +1,6 @@
-import {ship, Gameboard} from "./appModule.js";
+import {ship, Gameboard, player} from "./appModule.js";
+
+
 
 describe("Testing Starts here", () => {
 
@@ -70,5 +72,21 @@ describe("Testing Battlefied but all sunk: ", () => {
 
     it("Battlefield Report All Hit", () => {
         expect(battlefield.allSunk()).toBe(true);
+    })
+})
+
+describe("Player Status: ", () => {
+    let player1 = player("dave");
+    player1.playerPlaceShip(3,3,2);
+    player1.playerReceiveAttack(3,3);
+    
+    it("player not lost", () => {
+        player1.playerReceiveAttack(3,7);
+        expect(player1.checkPlayerStatus()).toBe(true);
+    })
+
+    it("player lose", () => {
+        player1.playerReceiveAttack(3,4);
+        expect(player1.checkPlayerStatus()).toBe(false);
     })
 })
