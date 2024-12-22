@@ -68,7 +68,7 @@ export const Gameboard = () => {
     }
 
     let receiveAttack = (x,y) => {
-        console.log("Before attack:", JSON.stringify(board[x][y]));
+        // console.log("Before attack:", JSON.stringify(board[x][y]));
         let cell = board[x][y];
         if(cell.status === "ship") {
             let ship = cell.getShip();
@@ -80,7 +80,7 @@ export const Gameboard = () => {
         } else if (cell.status === "water") {
             cell.isMiss();
         }
-        console.log("After attack:", JSON.stringify(board[x][y]));
+        // console.log("After attack:", JSON.stringify(board[x][y]));
         return cell.status;
     }
 
@@ -113,14 +113,6 @@ export const player = (playerName) => {
 
     let name = playerName;
 
-    let ship1 = ship(3);
-    let ship2 = ship(4);
-    let ship3 = ship(3);
-    
-    playerBoard.placeShip(3,3,ship1);
-    playerBoard.placeShip(1,1,ship2);
-    playerBoard.placeShip(6,7,ship3);
-
     let checkPlayerStatus = () => {
         if(playerBoard.allSunk() === true) {
             return false;
@@ -142,6 +134,30 @@ export const player = (playerName) => {
         playerBoard.printBoard();
     }
 
+    function getRandomInt(min, max) {
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+      }
+
+    let triggerComputerAttack = () => {
+        let x = getRandomInt(0,10);
+        let y = getRandomInt(0,10);
+
+        let counter = 1000;
+
+        while(playerBoard.board[x][y].status === "miss" || playerBoard.board[x][y].status === "hit") {
+            x = getRandomInt(0,10);
+            y = getRandomInt(0,10);
+            counter--;
+            if(counter < 0) {
+                break;
+            }
+        }
+
+        playerReceiveAttack(x,y);
+    }
+
 
     return {
         name, 
@@ -149,7 +165,8 @@ export const player = (playerName) => {
         checkPlayerStatus,
         playerReceiveAttack,
         playerPlaceShip,
-        playerPrintBoard
+        playerPrintBoard,
+        triggerComputerAttack
     }
 }
 

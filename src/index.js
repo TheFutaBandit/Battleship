@@ -83,12 +83,43 @@ let loadPlayerDOM = (player,playerBoardNode) => {
 let bootGame = (async () => {
     let player1 = player("dave");
     let player2 = player("ella");
+
+    //intialize placements random
+    let initializeShips = (player) => {
+        function getRandomInt(min, max) {
+            const minCeiled = Math.ceil(min);
+            const maxFloored = Math.floor(max);
+            return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+        }
+        for(let i = 0; i<4; i++) {
+            let shipLength = getRandomInt(2,6);
+            let x = getRandomInt(0,10);
+            let y = getRandomInt(0,10 - shipLength);
+            player.playerPlaceShip(x,y,shipLength);
+        }
+    }
+
+    initializeShips(player1);
+    initializeShips(player2);
+
     let d1 = loadPlayerDOM(player1,".player1");
     let d2 = loadPlayerDOM(player2,".player2");
 
     let turnFlag = 0;
 
-    let triggerTurn = function (turnFlag) {
+    let checkWinCondition = () => {
+        // console.log("hi");
+        if(player1.checkPlayerStatus() === false || player2.checkPlayerStatus() === false) {
+            console.log("hi");
+            if(player1.checkPlayerStatus() === false) {
+                console.log("player 1 lost");
+            } else {
+                console.log("futa");
+            }
+        }
+    }
+
+    let triggerTwoPlayerTurn = function (turnFlag) {
         if(turnFlag === 0) {
             d1.loadBoard(0);
             d2.loadBoard(1);
@@ -96,6 +127,18 @@ let bootGame = (async () => {
             d1.loadBoard(1);
             d2.loadBoard(0);
         }
+        checkWinCondition();
+    }
+
+    let triggerComputerTurn = function () {
+        d1.loadBoard(0);
+        d2.loadBoard(1);
+        player1.triggerComputerAttack();
+        d1.clearBoard();
+        d2.clearBoard();
+        d1.loadBoard(0);
+        d2.loadBoard(1);
+        checkWinCondition();
     }
 
     let triggerAlarm = () => {
@@ -104,18 +147,32 @@ let bootGame = (async () => {
         p1.addEventListener("click", () => {
             d1.clearBoard();
             d2.clearBoard();
-            triggerTurn(0);
+            triggerTwoPlayerTurn(0);
         })
         p2.addEventListener("click", () => {
             d1.clearBoard();
             d2.clearBoard();
-            triggerTurn(1);
+            triggerTwoPlayerTurn(1);
+        })
+    }
+
+    let triggerOnePlayer = () => {
+        let p2 = document.querySelector(".player2");
+        //initial load
+        d1.loadBoard(0);
+        d2.loadBoard(1);
+        p2.addEventListener("click", () => {
+            d1.clearBoard();
+            d2.clearBoard();
+            triggerComputerTurn();
         })
     }
 
     if(player1.checkPlayerStatus() === true && player2.checkPlayerStatus() === true) {
-        triggerTurn(turnFlag);
+        triggerTwoPlayerTurn(turnFlag);
         triggerAlarm();
+        // triggerOnePlayer();
+        // triggerComputerTurn();
     }
 })();
 
@@ -124,24 +181,3 @@ let bootGame = (async () => {
 
 
 
-let battlefield = Gameboard();
-
-let ship1 = ship(3);
-let ship2 = ship(4);
-let ship3 = ship(3);
-
-battlefield.placeShip(3,3,ship1);
-battlefield.placeShip(1,1,ship2);
-battlefield.placeShip(6,7,ship3);
-
-battlefield.receiveAttack(3,4);
-battlefield.receiveAttack(3,5);
-battlefield.receiveAttack(4,4);
-
-console.log(battlefield.checkTotal());
-
-battlefield.printBoard();
-
-battlefield.receiveAttack(3,3);
-
-console.log(battlefield.checkTotal());
