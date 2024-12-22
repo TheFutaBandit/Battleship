@@ -2,119 +2,122 @@ import {ship, Gameboard, player} from "./appModule.js";
 
 import "./styles.css";
 
-let bootGame = (() => {
-    let player1 = player("dave");
-    let computer = player("computer");
+let loadPlayerDOM = (player,playerBoardNode) => {
+    let changeTile = (defaultTileStatus, flag) => {
+        if (defaultTileStatus === "water") {
+            return "#5463FF";
+        } else if (defaultTileStatus === "ship" && flag === 0) {
+            return "#ECECEC";
+        } else if (defaultTileStatus === "miss") {
+                return "#1d6d86";
+        } else if (defaultTileStatus === "hit") {
+            return "#FF1818";
+        } 
+    
+        return "#5463FF"; 
+    };
 
-    const implementTile = function (tileObject, rowIndex, colIndex) {
+    const implementTile = function (tileObject, rowIndex, colIndex, parentBoardNode, flag) {
         const tile = document.createElement("div");
 
         tile.classList.add("tile");
         let defaultTileStatus = tileObject.status;
         
-        let changeTile = (defaultTileStatus) => {
-            let tileColor = "blue";
-
-            switch (defaultTileStatus) {
-                case "water":
-                    break;
-                case "ship":
-                    tileColor = "grey";
-                    break;
-                case "hit":
-                    tileColor = "red";
-                    break;
-                case "miss":
-                    tileColor = "black";
-                    break;
-            }
-
-            return tileColor;
-        }
-
-        let tileColor = changeTile(defaultTileStatus);
+        let tileColor = changeTile(defaultTileStatus, flag);
         
         tile.setAttribute("style", `background-color:${tileColor}`);  
 
         tile.setAttribute("data-row", rowIndex);
         tile.setAttribute("data-col", colIndex);
         
-        const parentBoard = document.querySelector(".player1");
+        const parentBoard = document.querySelector(parentBoardNode);
         
         parentBoard.appendChild(tile);
-
     }
 
     const toggleTile = function(tileNode, status) {
-
-        let changeTile = (defaultTileStatus) => {
-            let tileColor = "blue";
-
-            switch (defaultTileStatus) {
-                case "water":
-                    break;
-                case "ship":
-                    tileColor = "grey";
-                    break;
-                case "hit":
-                    tileColor = "red";
-                    break;
-                case "miss":
-                    tileColor = "aqua";
-                    break;
-            }
-
-            return tileColor;
-        }
-
         let newColor = changeTile(status);
-
         tileNode.setAttribute("style", `background-color:${newColor}`);
     }
 
-    //intialize game
-    let loadBoard = (() => {
-        const board = document.querySelector(".player1")
+    let loadBoard = (flag = 0) => {
+        //selects board node
+        const board = document.querySelector(playerBoardNode) 
 
+        //implements tile, ties them to the ship object
         for(let i = 0; i < 10; i++) {
             for(let j = 0; j < 10; j++) {
-                implementTile(player1.playerBoard.board[i][j],i,j);
+                implementTile(player.playerBoard.board[i][j],i,j,playerBoardNode,flag);
             }
         }
 
+        //checkBoard function to test results
+        let checkBoard = () => {
+            return player.playerBoard.allSunk();
+        }
+
+        //Event delegation to the board using target event to trigger hit or miss
         board.addEventListener("click", (event) => {
             let tile = event.target;
             let row = tile.getAttribute("data-row");
             let col = tile.getAttribute("data-col");
-            let status = player1.playerBoard.receiveAttack(+row,+col);
+            let status = player.playerReceiveAttack(+row,+col);
             toggleTile(tile,status);
-            console.log(tile);
+            // if(checkBoard() === true) {
+            //     alert("you lost");
+            // }
         })
-    })();
+    };
 
-    //start game
-})();
-
-let gamebattle = (player1, player2) => {
-    let turnFlag = 0;
-
-    
-
-    while(player1.checkPlayerStatus() === true && player2.checkPlayerStatus() === true) {
-        if(turnFlag === 0) {
-            //intiatePlayerTurn(player1);
-        } else {
-            intiatePlayerTurn(player2);
-        }
-        turnFlag = !turnFlag;
+    let clearBoard = () => {
+        const board = document.querySelector(playerBoardNode);
+        board.innerHTML = "";
     }
 
-    if(player1.checkPlayerStatus() === false) {
-        console.log("player2 wins");
-    } else {
-        console.log("player1 wins");
+    return {
+        loadBoard,
+        clearBoard
     }
 }
+
+let bootGame = (async () => {
+    let player1 = player("dave");
+    let player2 = player("ella");
+    let d1 = loadPlayerDOM(player1,".player1");
+    let d2 = loadPlayerDOM(player2,".player2");
+
+    let turnFlag = 0;
+
+    let triggerTurn = function (turnFlag) {
+        if(turnFlag === 0) {
+            d1.loadBoard(0);
+            d2.loadBoard(1);
+        } else {
+            d1.loadBoard(1);
+            d2.loadBoard(0);
+        }
+    }
+
+    let triggerAlarm = () => {
+        let p1 = document.querySelector(".player1");
+        let p2 = document.querySelector(".player2");
+        p1.addEventListener("click", () => {
+            d1.clearBoard();
+            d2.clearBoard();
+            triggerTurn(0);
+        })
+        p2.addEventListener("click", () => {
+            d1.clearBoard();
+            d2.clearBoard();
+            triggerTurn(1);
+        })
+    }
+
+    if(player1.checkPlayerStatus() === true && player2.checkPlayerStatus() === true) {
+        triggerTurn(turnFlag);
+        triggerAlarm();
+    }
+})();
 
 
 //game dom

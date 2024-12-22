@@ -49,25 +49,38 @@
   }
 
   .gameArea {
-    height: 400px;
+    height: 420px;
     width: 800px;
     /* background-color: blue; */
     display: grid;
-    grid-template-columns: repeat(2,1fr);
+    grid-template-rows: 30px 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
   .gameArea > * {
-    border: 1px solid black;
+    /* border: 1px solid black; */
+    /* background-color: #0c0c0d; */
     display: grid;
     grid-template-columns: repeat(10,1fr);
     grid-template-rows: repeat(10,1fr);
-    /* gap: 1px;
-    padding: 2px; */
+    /* gap: 1px; */
+    /* padding: 2px; */
     cursor: pointer;
   }
 
-  .player1 .tile {
+  .player1 .tile, .player2 .tile {
     /* background-color: blue; */
-    border: 1px solid black;
+    border: 0.5px solid #0c0c0d;
+  }
+
+  .player1_name, .player2_name {
+    /* background-color: blue; */
+    display: flex;
+    color: black;
+    font-size: 24px;
+    font-family: Helvetica, Arial, sans-serif;
+    padding: 0px;
+    justify-content: center;
+    align-items: center;
   }

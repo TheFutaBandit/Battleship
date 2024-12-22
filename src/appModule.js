@@ -40,9 +40,9 @@ export const Gameboard = () => {
         return {
             status : "water",
             ship : null,
-            isHit : function () { this.status = "hit" },
-            isMiss : function () { this.status = "miss" },
-            placeShip : function (ship) { this.status = "ship", this.ship = ship },
+            isHit : function () { if(this.status === "ship") {this.status = "hit"} },
+            isMiss : function () { if(this.status === "water") {this.status = "miss"} },
+            placeShip : function (ship) { if(this.status === "water") { this.status = "ship", this.ship = ship } },
             getShip : function () { return this.ship },
             getStatus : function () { return this.status },
         }
@@ -68,6 +68,7 @@ export const Gameboard = () => {
     }
 
     let receiveAttack = (x,y) => {
+        console.log("Before attack:", JSON.stringify(board[x][y]));
         let cell = board[x][y];
         if(cell.status === "ship") {
             let ship = cell.getShip();
@@ -76,11 +77,11 @@ export const Gameboard = () => {
             if(ship.isSunk() === true) {
                 totalShips--;
             }
-            return "hit";
-        } else {
+        } else if (cell.status === "water") {
             cell.isMiss();
-            return "miss";
         }
+        console.log("After attack:", JSON.stringify(board[x][y]));
+        return cell.status;
     }
 
     let printBoard = () => {
